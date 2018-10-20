@@ -244,8 +244,9 @@ class Program:
         template = re.sub(r'%(\w)', r'%(\1)s', template)
         return os.path.join(outdir, template % v)
 
+
     @staticmethod
-    def getCDDB(cddbdiscid):
+    def getCDDB(self, cddbdiscid, full_metadata=False):
         """
         @param cddbdiscid: list of id, tracks, offsets, seconds
 
@@ -255,7 +256,11 @@ class Program:
         try:
             md = freedb.perform_lookup(cddbdiscid, 'freedb.freedb.org', 80)
             logger.debug('CDDB query result: %r', md)
-            return [item['DTITLE'] for item in md if 'DTITLE' in item] or None
+            if full_metadata:
+                return list(md)
+            else:
+                return [item['DTITLE']
+                        for item in md if 'DTITLE' in item] or None
 
         except ValueError as e:
             logger.warning("CDDB protocol error: %s", e)
@@ -269,12 +274,49 @@ class Program:
 
         return None
 
-    def craftMusicBrainzFromFreeDB(self, freedb_data):
+    def craftMusicBrainzFromFreeDB(self, raw_data):
         """
-        Create MusicBrainz-sytle metadata from a FreeDB entry.
+        Create MusicBrainz-style metadata from a FreeDB entry.
         """
         disc = mbngs.DiscMetadata()
 
+        def _split_dtitle(dtitle):
+        # Note: we can not use a simple dtitle.split('/') here because the
+        # slash could be escaped.
+            _slash_split_regex = re.compile(r'(?<!\\)/')
+            artist, title = re.split(_slash_split_regex, dtitle, maxsplit=1)
+            return artist.rstrip(), title.lstrip()
+
+        def _reformat(raw):
+            """Coerce the raw data into something easier to work with
+            """
+
+            data = {}
+            dtitle = ''
+            tracks = {}
+            for key, value in raw.items():
+                if not value:
+                    continue
+                if key == 'DTITLE':
+                    dtitle += value
+                elif key == 'DYEAR':
+                    data['year'] = int(value)
+                elif key == 'DGENRE':
+                    data['genre'] = value
+                elif key.startswith('TTITLE'):
+                    n = int(key[6:])
+                    tracks[n] = tracks.get(n, '') + value
+            try:
+                artist, title = _split_dtitle(dtitle)
+            except:
+                raise Exception('Unable to parse DTITLE "%s"' % dtitle)
+            data['artist_title'] = dtitle
+            data['artist'] = artist
+            data['title'] = title
+            data['tracks'] = [v for k, v in sorted(tracks.items())]
+            return data
+
+        freedb_data = _reformat(raw_data)
         disc.artist = disc.sortName = freedb_data.get('artist')
         disc.release = str(freedb_data.get('year', '0000'))
         disc.title = disc.releaseTitle = freedb_data.get('title')
