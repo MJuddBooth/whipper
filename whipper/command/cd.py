@@ -80,6 +80,11 @@ class _CD(BaseCommand):
                             action="store", dest="country",
                             help="Filter releases by country")
 
+        parser.add_argument('--allow-freedb',
+                                 action="store_true", dest="allow_freedb",
+                                 help="whether to allow relying on low "
+                                 "quality CDDB/FreeDB metadata if nothing "
+                                 "else is available", default=False)
     def do(self):
         self.config = config.Config()
         self.program = program.Program(self.config,
@@ -127,9 +132,11 @@ class _CD(BaseCommand):
                                    'standards.')
                     logger.warning('You are strongly encouraged to submit CD '
                                    'information to the MusicBrainz database.')
-                    fdb_data = sfdb.read(match['category'], match['discid'])
+                    cddbmd_full = self.program.getCDDB(cddbid,
+                                                       full_metadata=True)
+                    #FIXME: allow choice if more than one entry?
                     self.program.metadata = \
-                        self.program.craftMusicBrainzFromFreeDB(fdb_data)
+                        self.program.craftMusicBrainzFromFreeDB(cddbmd_full[0])
 
         if not self.program.metadata:
             # also used by rip cd info
@@ -284,11 +291,11 @@ Log files will log the path to tracks relative to this directory.
                                  action="store_true", dest="unknown",
                                  help="whether to continue ripping if "
                                  "the CD is unknown", default=False)
-        self.parser.add_argument('--allow-freedb',
-                                 action="store_true", dest="allow_freedb",
-                                 help="whether to allow relying on low "
-                                 "quality CDDB/FreeDB metadata if nothing "
-                                 "else is available", default=False)
+#         self.parser.add_argument('--allow-freedb',
+#                                  action="store_true", dest="allow_freedb",
+#                                  help="whether to allow relying on low "
+#                                  "quality CDDB/FreeDB metadata if nothing "
+#                                  "else is available", default=False)
         self.parser.add_argument('--cdr',
                                  action="store_true", dest="cdr",
                                  help="whether to continue ripping if "
