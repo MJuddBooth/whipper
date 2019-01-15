@@ -293,7 +293,10 @@ class Program:
                 if key == 'DTITLE':
                     dtitle += value
                 elif key == 'DYEAR':
-                    data['year'] = int(value)
+                    try:
+                        data['year'] = int(value)
+                    except:
+                        pass # or should we put in 0?
                 elif key == 'DGENRE':
                     data['genre'] = value
                 elif key.startswith('TTITLE'):
