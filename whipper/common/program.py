@@ -493,9 +493,6 @@ class Program:
 
         tags = {}
 
-        if number > 0:
-            tags['MUSICBRAINZ_DISCID'] = mbdiscid
-
         if self.metadata and not self.metadata.various:
             tags['ALBUMARTIST'] = releaseArtist
         tags['ARTIST'] = trackArtist
@@ -519,6 +516,7 @@ class Program:
                 tags['MUSICBRAINZ_ALBUMARTISTID'] = mbidReleaseArtist
                 if len(mbidWorks) > 0:
                     tags['MUSICBRAINZ_WORKID'] = mbidWorks
+                tags['MUSICBRAINZ_DISCID'] = mbdiscid
 
         # TODO/FIXME: ISRC tag
 
