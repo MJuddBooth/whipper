@@ -505,8 +505,9 @@ class Program:
             if self.metadata.release is not None:
                 tags['DATE'] = self.metadata.release
 
-            has_mbinfo = (mbidTrack and mbidTrackArtist and mbidRelease
-                          and mbidReleaseArtist and mbdiscid)
+            if number > 0:
+                has_mbinfo = (mbidTrack and mbidTrackArtist and mbidRelease
+                              and mbidReleaseArtist and mbdiscid)
             if number > 0 and has_mbinfo:
                 tags['MUSICBRAINZ_RELEASETRACKID'] = mbidTrack
                 tags['MUSICBRAINZ_TRACKID'] = mbidRecording
