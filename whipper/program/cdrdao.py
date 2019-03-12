@@ -126,7 +126,8 @@ class ReadTOCTask(task.Task):
             for line in lines:
                 self._parser.parse(line)
                 if (self._parser.currentTrack != 0 and
-                        self._parser.tracks != 0):
+                        self._parser.tracks != 0 and
+                        self._parser.tracks):
                     progress = (float('%d' % self._parser.currentTrack) /
                                 float(self._parser.tracks))
                     if progress < 1.0:
