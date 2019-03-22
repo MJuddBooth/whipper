@@ -246,7 +246,7 @@ class Program:
 
 
     @staticmethod
-    def getCDDB(self, cddbdiscid, full_metadata=False):
+    def getCDDB(cddbdiscid, full_metadata=False):
         """
         @param cddbdiscid: list of id, tracks, offsets, seconds
 
